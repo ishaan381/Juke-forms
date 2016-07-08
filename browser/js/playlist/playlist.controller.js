@@ -1,12 +1,12 @@
-juke.controller('PlaylistCtrl', function ($scope, PlaylistFactory) {
-
+juke.controller('PlaylistFormCtrl', function ($state, $scope, PlaylistFactory) {
 
     $scope.submit = function () {
       PlaylistFactory.create($scope.playlist)
-      .then(function(playlist) {
+      .then(function (playlist) {
        $scope.playlistForm.$setPristine();
        $scope.playlist.name = null;
-     })
+       $state.go('playlist', {playlistId: playlist.id})
+     });
 
     };
     $scope.isNotValid = function () {
@@ -17,10 +17,36 @@ juke.controller('PlaylistCtrl', function ($scope, PlaylistFactory) {
     };
   });
 
-juke.controller('PlaylistItemsCtrl', function($scope, PlaylistFactory) {
-  PlaylistFactory.fetchAll()
-  .then(function(playlists) {
-    $scope.playlists = playlists;
-  })
+
+juke.controller('PlaylistCtrl', function($scope, thePlaylist, songSelection, PlaylistFactory, PlayerFactory) {
+
+  $scope.playlist = thePlaylist;
+  $scope.playlist.songSelection = songSelection;
+
+  $scope.addSong = function (playlist, song) {
+    PlaylistFactory.addSong(playlist, song)
+    .then(function () {
+      $scope.addSongForm.$setPristine();
+      $scope.selectedSong = null;
+    });
+  };
+
+  $scope.getCurrentSong = function () {
+    return PlayerFactory.getCurrentSong();
+  };
+
+  $scope.isPlaying = function (song) {
+    return PlayerFactory.isPlaying() && PlayerFactory.getCurrentSong() === song;
+  };
+
+  $scope.toggle = function (song) {
+    if (song !== PlayerFactory.getCurrentSong()) {
+      PlayerFactory.start(song, $scope.playlist.songs);
+    } else if ( PlayerFactory.isPlaying() ) {
+      PlayerFactory.pause();
+    } else {
+      PlayerFactory.resume();
+    }
+  };
 
 })

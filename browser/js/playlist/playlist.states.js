@@ -2,6 +2,21 @@ juke.config(function ($stateProvider) {
   $stateProvider.state('newPlaylist', {
     url: '/playlists/new',
     templateUrl: '/js/playlist/templates/form.html',
-    controller: 'PlaylistCtrl'
+    controller: 'PlaylistFormCtrl'
+  });
+
+  $stateProvider.state('playlist', {
+    url: '/playlists/:playlistId',
+    templateUrl: '/js/playlist/templates/playlist.html',
+    controller: 'PlaylistCtrl',
+    resolve: {
+      thePlaylist: function (PlaylistFactory, $stateParams) {
+        return PlaylistFactory.fetchById($stateParams.playlistId)
+      },
+      songSelection: function (SongFactory) {
+        return SongFactory.fetchAll();
+      }
+    }
+
   });
 });
